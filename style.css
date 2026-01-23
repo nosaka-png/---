@@ -1,0 +1,362 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.container {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+}
+
+h1 {
+    color: #333;
+    margin-bottom: 30px;
+    font-size: 28px;
+}
+
+.time-display {
+    font-size: 64px;
+    font-weight: bold;
+    color: #667eea;
+    margin-bottom: 40px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 4px;
+}
+
+/* 砂時計のコンテナ */
+.hourglass-container {
+    display: flex;
+    justify-content: center;
+    margin: 40px 0;
+}
+
+.hourglass {
+    position: relative;
+    width: 200px;
+    height: 320px;
+}
+
+/* 上部の容器（逆三角形/円錐形） */
+.top-container {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 180px;
+    height: 160px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    border: 3px solid #667eea;
+    border-bottom: none;
+    overflow: hidden;
+}
+
+.sand-top {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    transform-origin: bottom center;
+    transition: clip-path 0.3s ease-out;
+}
+
+/* 上部の砂の表面（波打つような傾斜） */
+.sand-top::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+}
+
+/* 下部の容器（正三角形/円錐形） */
+.bottom-container {
+    position: absolute;
+    top: 160px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 180px;
+    height: 160px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    clip-path: polygon(50% 0, 0 100%, 100% 100%);
+    border: 3px solid #667eea;
+    border-top: none;
+    overflow: hidden;
+}
+
+.sand-bottom {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    height: 0%;
+    background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+    clip-path: polygon(50% 100%, 0 100%, 100% 100%);
+    transform-origin: bottom center;
+    transition: height 0.3s ease-out, clip-path 0.3s ease-out;
+    overflow: visible;
+}
+
+/* 下部の砂の表面（円錐状の山の頂点） */
+.sand-bottom::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) translateY(50%);
+    width: 0;
+    height: 0;
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-bottom: 12px solid rgba(255, 255, 255, 0.4);
+    opacity: var(--show-surface, 0);
+    transition: opacity 0.3s;
+    z-index: 1;
+}
+
+/* 時間設定 */
+.time-setting {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 30px 0;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.input-group label {
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+}
+
+.input-group input {
+    width: 80px;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 18px;
+    text-align: center;
+    transition: border-color 0.3s;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+/* プリセットボタン */
+.presets {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+
+.preset-btn {
+    padding: 10px 20px;
+    border: 2px solid #667eea;
+    background: white;
+    color: #667eea;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.preset-btn:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.preset-btn:active {
+    transform: translateY(0);
+}
+
+/* 途中で時間追加 */
+.add-time {
+    margin: 18px 0 8px;
+    padding: 14px 12px;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    background: rgba(102, 126, 234, 0.04);
+}
+
+.add-time-title {
+    font-size: 14px;
+    color: #555;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.add-time-row {
+    display: flex;
+    justify-content: center;
+    align-items: end;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.input-group.small input {
+    width: 90px;
+}
+
+.btn-add {
+    background: #667eea;
+    color: white;
+}
+
+.btn-add:hover:not(:disabled) {
+    background: #5568e0;
+}
+
+/* コントロールボタン */
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    min-width: 100px;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.btn:not(:disabled):active {
+    transform: translateY(0);
+}
+
+.btn-start {
+    background: #4caf50;
+    color: white;
+}
+
+.btn-start:hover:not(:disabled) {
+    background: #45a049;
+}
+
+.btn-pause {
+    background: #ff9800;
+    color: white;
+}
+
+.btn-pause:hover:not(:disabled) {
+    background: #e68900;
+}
+
+.btn-resume {
+    background: #2196f3;
+    color: white;
+}
+
+.btn-resume:hover:not(:disabled) {
+    background: #0b7dda;
+}
+
+.btn-reset {
+    background: #f44336;
+    color: white;
+}
+
+.btn-reset:hover:not(:disabled) {
+    background: #da190b;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 600px) {
+    .container {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 24px;
+    }
+
+    .time-display {
+        font-size: 48px;
+        margin-bottom: 30px;
+    }
+
+    .hourglass {
+        width: 150px;
+        height: 240px;
+    }
+
+    .top-container,
+    .bottom-container {
+        width: 135px;
+        height: 120px;
+    }
+
+    .bottom-container {
+        top: 120px;
+    }
+
+    .controls {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+    }
+
+    .add-time-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .input-group.small input {
+        width: 100%;
+    }
+}

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>砂時計型タイマー</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>タイマネくん</h1>
+        
+        <!-- 時間表示 -->
+        <div class="time-display">
+            <span id="minutes">05</span>:<span id="seconds">00</span>
+        </div>
+
+        <!-- 砂時計のビジュアル -->
+        <div class="hourglass-container">
+            <div class="hourglass">
+                <!-- 上部の容器 -->
+                <div class="top-container">
+                    <div class="sand-top" id="sandTop"></div>
+                </div>
+                
+                <!-- 下部の容器 -->
+                <div class="bottom-container">
+                    <div class="sand-bottom" id="sandBottom"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 時間設定 -->
+        <div class="time-setting">
+            <div class="input-group">
+                <label for="minutesInput">分</label>
+                <input type="number" id="minutesInput" min="0" max="999" value="5">
+            </div>
+            <div class="input-group">
+                <label for="secondsInput">秒</label>
+                <input type="number" id="secondsInput" min="0" max="59" value="0">
+            </div>
+        </div>
+
+        <!-- プリセット時間ボタン -->
+        <div class="presets">
+            <button class="preset-btn" data-minutes="10">問題発見 10分</button>
+            <button class="preset-btn" data-minutes="8">付箋書き出し 8分</button>
+            <button class="preset-btn" data-minutes="18">課題設定 18分</button>
+            <button class="preset-btn" data-minutes="19">課題解決 19分</button>
+        </div>
+
+        <!-- 途中で時間追加 -->
+        <div class="add-time">
+            <div class="add-time-title">時間追加</div>
+            <div class="add-time-row">
+                <div class="input-group small">
+                    <label for="addMinutesInput">分</label>
+                    <input type="number" id="addMinutesInput" min="0" max="999" value="0">
+                </div>
+                <div class="input-group small">
+                    <label for="addSecondsInput">秒</label>
+                    <input type="number" id="addSecondsInput" min="0" max="59" value="0">
+                </div>
+                <button id="addTimeBtn" class="btn btn-add" disabled>追加</button>
+            </div>
+        </div>
+
+        <!-- コントロールボタン -->
+        <div class="controls">
+            <button id="startBtn" class="btn btn-start">開始</button>
+            <button id="pauseBtn" class="btn btn-pause" disabled>一時停止</button>
+            <button id="resumeBtn" class="btn btn-resume" disabled>再開</button>
+            <button id="resetBtn" class="btn btn-reset">リセット</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
