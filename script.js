@@ -4,6 +4,7 @@ let remainingSeconds = totalSeconds;
 let timerInterval = null;
 let isRunning = false;
 let isPaused = false;
+let nextTimerCallback = null; // タイマー終了後の次のタイマーを開始するコールバック
 
 // DOM要素の取得
 const minutesDisplay = document.getElementById('minutes');
@@ -136,6 +137,15 @@ function startTimer() {
         if (remainingSeconds <= 0) {
             stopTimer();
             triggerAlarm();
+            
+            // 次のタイマーがある場合は自動的に開始
+            if (nextTimerCallback) {
+                const callback = nextTimerCallback;
+                nextTimerCallback = null; // コールバックをクリア
+                setTimeout(() => {
+                    callback();
+                }, 1000); // アラーム後に1秒待ってから次のタイマーを開始
+            }
         }
     }, 1000);
 }
@@ -167,6 +177,15 @@ function resumeTimer() {
         if (remainingSeconds <= 0) {
             stopTimer();
             triggerAlarm();
+            
+            // 次のタイマーがある場合は自動的に開始
+            if (nextTimerCallback) {
+                const callback = nextTimerCallback;
+                nextTimerCallback = null; // コールバックをクリア
+                setTimeout(() => {
+                    callback();
+                }, 1000); // アラーム後に1秒待ってから次のタイマーを開始
+            }
         }
     }, 1000);
 }
@@ -178,18 +197,24 @@ function stopTimer() {
     isRunning = false;
     isPaused = false;
     
-    // ボタンの状態を更新
-    startBtn.disabled = false;
-    pauseBtn.disabled = true;
-    resumeBtn.disabled = true;
-    minutesInput.disabled = false;
-    secondsInput.disabled = false;
-    addTimeBtn.disabled = true;
+    // 次のタイマーが予定されていない場合のみボタン状態を更新
+    if (!nextTimerCallback) {
+        // ボタンの状態を更新
+        startBtn.disabled = false;
+        pauseBtn.disabled = true;
+        resumeBtn.disabled = true;
+        minutesInput.disabled = false;
+        secondsInput.disabled = false;
+        addTimeBtn.disabled = true;
+    }
 }
 
 // タイマーのリセット
 function resetTimer() {
     stopTimer();
+    
+    // 連続タイマーのコールバックをクリア
+    nextTimerCallback = null;
     
     // 初期値に戻す
     const minutes = parseInt(minutesInput.value) || 0;
@@ -208,10 +233,63 @@ function setPresetTime(minutes) {
         return;
     }
     
+    // 通常のプリセットの場合は、連続タイマーのコールバックをクリア
+    nextTimerCallback = null;
+    
     minutesInput.value = minutes;
     secondsInput.value = 0;
     totalSeconds = minutes * 60;
     remainingSeconds = totalSeconds;
+    
+    updateDisplay();
+    updateHourglass();
+}
+
+// 共有会プリセット（4分→2分の連続タイマー）
+function setSharingMeetingPreset() {
+    if (isRunning) {
+        alert('タイマーが実行中です。リセットしてから設定してください。');
+        return;
+    }
+    
+    // 最初の4分タイマーを設定
+    minutesInput.value = 4;
+    secondsInput.value = 0;
+    totalSeconds = 4 * 60;
+    remainingSeconds = totalSeconds;
+    
+    // 4分終了後に2分のタイマーを自動開始するコールバックを設定
+    nextTimerCallback = () => {
+        // 2分のタイマーを設定して開始
+        minutesInput.value = 2;
+        secondsInput.value = 0;
+        totalSeconds = 2 * 60;
+        remainingSeconds = totalSeconds;
+        
+        updateDisplay();
+        updateHourglass();
+        
+        // 自動的に2分のタイマーを開始
+        isRunning = true;
+        isPaused = false;
+        startBtn.disabled = true;
+        pauseBtn.disabled = false;
+        resumeBtn.disabled = true;
+        minutesInput.disabled = true;
+        secondsInput.disabled = true;
+        addTimeBtn.disabled = false;
+        
+        timerInterval = setInterval(() => {
+            remainingSeconds--;
+            updateDisplay();
+            updateHourglass();
+            
+            if (remainingSeconds <= 0) {
+                stopTimer();
+                triggerAlarm();
+            }
+        }, 1000);
+    };
     
     updateDisplay();
     updateHourglass();
@@ -308,9 +386,19 @@ addTimeBtn.addEventListener('click', () => {
 presetButtons.forEach(btn => {
     btn.addEventListener('click', () => {
         const minutes = parseInt(btn.getAttribute('data-minutes'));
-        setPresetTime(minutes);
+        if (minutes !== null && !isNaN(minutes)) {
+            setPresetTime(minutes);
+        }
     });
 });
+
+// 共有会ボタンのイベント
+const sharingMeetingBtn = document.getElementById('sharingMeetingBtn');
+if (sharingMeetingBtn) {
+    sharingMeetingBtn.addEventListener('click', () => {
+        setSharingMeetingPreset();
+    });
+}
 
 // 入力値の変更時に表示を更新
 minutesInput.addEventListener('input', () => {
