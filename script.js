@@ -21,9 +21,14 @@ const sandBottom = document.getElementById('sandBottom');
 const addMinutesInput = document.getElementById('addMinutesInput');
 const addSecondsInput = document.getElementById('addSecondsInput');
 const addTimeBtn = document.getElementById('addTimeBtn');
+const phaseLabel = document.getElementById('phaseLabel');
 
 // 時間表示の更新
 function updateDisplay() {
+    // NaNチェック
+    if (isNaN(remainingSeconds) || !isFinite(remainingSeconds)) {
+        remainingSeconds = 0;
+    }
     const minutes = Math.floor(remainingSeconds / 60);
     const seconds = remainingSeconds % 60;
     minutesDisplay.textContent = String(minutes).padStart(2, '0');
@@ -145,6 +150,9 @@ function startTimer() {
                 setTimeout(() => {
                     callback();
                 }, 1000); // アラーム後に1秒待ってから次のタイマーを開始
+            } else {
+                // 次のタイマーがない場合はラベルを非表示
+                hidePhaseLabel();
             }
         }
     }, 1000);
@@ -185,6 +193,9 @@ function resumeTimer() {
                 setTimeout(() => {
                     callback();
                 }, 1000); // アラーム後に1秒待ってから次のタイマーを開始
+            } else {
+                // 次のタイマーがない場合はラベルを非表示
+                hidePhaseLabel();
             }
         }
     }, 1000);
@@ -216,6 +227,14 @@ function resetTimer() {
     // 連続タイマーのコールバックをクリア
     nextTimerCallback = null;
     
+    // フェーズラベルを非表示（共有会以外の場合は非表示のまま）
+    // 共有会の場合は、4分のタイマーが設定されているので「プレゼンタイム」を表示
+    if (totalSeconds === 4 * 60 && minutesInput.value === '4') {
+        showPhaseLabel('プレゼンタイム');
+    } else {
+        hidePhaseLabel();
+    }
+    
     // 初期値に戻す
     const minutes = parseInt(minutesInput.value) || 0;
     const seconds = parseInt(secondsInput.value) || 0;
@@ -236,6 +255,9 @@ function setPresetTime(minutes) {
     // 通常のプリセットの場合は、連続タイマーのコールバックをクリア
     nextTimerCallback = null;
     
+    // フェーズラベルを非表示
+    hidePhaseLabel();
+    
     minutesInput.value = minutes;
     secondsInput.value = 0;
     totalSeconds = minutes * 60;
@@ -252,19 +274,29 @@ function setSharingMeetingPreset() {
         return;
     }
     
+    // 連続タイマーのコールバックをクリア（念のため）
+    nextTimerCallback = null;
+    
     // 最初の4分タイマーを設定
-    minutesInput.value = 4;
-    secondsInput.value = 0;
+    // 直接値を設定（inputイベントに依存しない）
+    minutesInput.value = '4';
+    secondsInput.value = '0';
     totalSeconds = 4 * 60;
-    remainingSeconds = totalSeconds;
+    remainingSeconds = 4 * 60; // 直接値を設定
+    
+    // 「プレゼンタイム」を表示
+    showPhaseLabel('プレゼンタイム');
     
     // 4分終了後に2分のタイマーを自動開始するコールバックを設定
     nextTimerCallback = () => {
         // 2分のタイマーを設定して開始
-        minutesInput.value = 2;
-        secondsInput.value = 0;
+        minutesInput.value = '2';
+        secondsInput.value = '0';
         totalSeconds = 2 * 60;
         remainingSeconds = totalSeconds;
+        
+        // 「フィードバックタイム」を表示
+        showPhaseLabel('フィードバックタイム');
         
         updateDisplay();
         updateHourglass();
@@ -287,12 +319,30 @@ function setSharingMeetingPreset() {
             if (remainingSeconds <= 0) {
                 stopTimer();
                 triggerAlarm();
+                // タイマー終了時にラベルを非表示
+                hidePhaseLabel();
             }
         }, 1000);
     };
     
+    // 表示を更新
     updateDisplay();
     updateHourglass();
+}
+
+// フェーズラベルの表示
+function showPhaseLabel(text) {
+    if (phaseLabel) {
+        phaseLabel.textContent = text;
+        phaseLabel.style.display = 'block';
+    }
+}
+
+// フェーズラベルの非表示
+function hidePhaseLabel() {
+    if (phaseLabel) {
+        phaseLabel.style.display = 'none';
+    }
 }
 
 // アラーム機能

@@ -30,6 +30,26 @@ h1 {
     font-size: 28px;
 }
 
+.phase-label {
+    font-size: 20px;
+    font-weight: 600;
+    color: #f5576c;
+    margin-bottom: 10px;
+    text-align: center;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .time-display {
     font-size: 64px;
     font-weight: bold;
